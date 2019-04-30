@@ -1,1 +1,1 @@
-# image-from-gdrive-to-gsheet
+# Parse images from Google Drive to Google Sheets. 
