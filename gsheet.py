@@ -11,7 +11,7 @@ import gdrive
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # The ID and range of a sample spreadsheet.
-SPREADSHEET_ID = '1SJqPnKEnHTpG4YZlrxKIB5d7vXwSXIBbJJhcnzqGoYA'
+SPREADSHEET_ID = open('ID.txt', 'r').readline()
 
 
 def main():
@@ -39,15 +39,7 @@ def main():
 
     service = build('sheets', 'v4', credentials=creds)
 
-    # Call the Sheets API
-    # sheet = service.spreadsheets()
-    # result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-    #                             range=RANGE_NAME).execute()
-    # values = result.get('values', [])
 
-
-    RANGE_IMAGE_NAME = ''
-    RANGE_IMAGE_ID = ''
 
     all_files = gdrive.getFiles()
     l = len(all_files)
@@ -58,13 +50,15 @@ def main():
 
     for i in all_files:
         image_index.append([str(i[0])])
+        image_id.append([f"=IMAGE(\"https://drive.google.com/uc?id={i[2]}\", 1)"])
         image_name.append([str(i[1]).split(".")[0]])
-        image_id.append([f"=IMAGE(\"https://drive.google.com/us?id={i[2]}\", 1)"])
 
 
-    RANGE_IMAGE_INDEX = f'A2:{l+1}'
-    RANGE_IMAGE_NAME = f'B2:{l+1}'
-    RANGE_IMAGE_ID = f'C2:{l+1}'
+    # Set your cell and row
+
+    RANGE_IMAGE_INDEX = f'A2:{l + 1}'
+    RANGE_IMAGE_ID = f'B2:{l + 1}'
+    RANGE_IMAGE_NAME = f'C2:{l + 1}'
 
 
     data = [
@@ -74,12 +68,12 @@ def main():
         },
         {
             'range': RANGE_IMAGE_ID,
-            'values': image_name
+            'values': image_id
         },
         {
             'range': RANGE_IMAGE_NAME,
-            'values': image_id
-        }
+            'values': image_name
+        },
     ]
     body = {
         'valueInputOption': 'USER_ENTERED',
@@ -88,7 +82,6 @@ def main():
     result = service.spreadsheets().values().batchUpdate(
         spreadsheetId=SPREADSHEET_ID, body=body).execute()
     print('{0} cells updated.'.format(result.get('updatedCells')))
-
 
 
 if __name__ == '__main__':

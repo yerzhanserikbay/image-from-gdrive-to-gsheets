@@ -1,1 +1,7 @@
 .DS_Store
+credentials-gdrive.json
+credentials-gsheet.json
+ID.txt
+TOKEN.txt
+token-gdrive.pickle
+token-gsheet.pickle

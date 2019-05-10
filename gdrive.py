@@ -9,6 +9,7 @@ import pprint
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+TOKEN = open('TOKEN.txt', 'r').readline()
 
 
 def getFiles():
@@ -38,94 +39,86 @@ def getFiles():
 
     # Call the Drive v3 API
 
-    results = service.files().list(
-        pageSize=425, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
-
-    # if not items:
-    #     print('No files found.')
-    # else:
-    #     print('Files:')
-    #     for item in items:
-    #         print(u'{0} ({1})'.format(item['name'], item['id']))
-
-    # folder_id = '0B7URSlB1tD6YWFV4bGRXQWRmSk0'
-
     page_token = None
 
-    response = service.files().list(q="'1cghx9fx2aWchKsaEQrupoXdCr7nJrXxb' in parents",
+    items = service.files().list(q="{} in parents".format(TOKEN),
                                     spaces='drive',
                                     fields='nextPageToken, files(id, name)',
                                     pageSize=490,
                                     pageToken=page_token).execute()
 
-    remoteFilesArray = []
 
-    filesInfoArray = []
+    files_info_array = []
+
+    remote_files_array = []
 
     if not items:
         print('No files found.')
     else:
         print('Files:')
         i = 1
-        for item in response.get('files', []):
+        for item in items.get('files', []):
             # print(u'{0} - {1} ({2})'.format(i, item['name'], item['id']))
-            filesInfoArray.append([i, item['name'], item['id']])
+            files_info_array.append([i, item['name'], item['id']])
             # filesDict[str(item['name']).split(".")[0]] = "Null"
-            remoteFilesArray.append(str(item['name']).split(".")[0])
+            remote_files_array.append(str(item['name']).split(".")[0])
             i += 1
 
-    return filesInfoArray
+    pprint.pprint(files_info_array)
 
-    pprint.pprint(filesInfoArray)
+
+    return files_info_array
+
+
 
     # Comparing
 
-    localFilesArray = []
+    local_files_array = []
 
     jpeg = glob.glob('/Users/ys/Documents/image/*.jpeg')
     jpg = glob.glob('/Users/ys/Documents/image/*.jpg')
 
-    localFilesArray.extend(jpg)
-    localFilesArray.extend(jpeg)
+    local_files_array.extend(jpg)
+    local_files_array.extend(jpeg)
 
-    print("remoteFilesArray count: ", len(remoteFilesArray))
+    print("remoteFilesArray count: ", len(remote_files_array))
 
-    print("localFilesArray count: ", len(localFilesArray))
+    print("localFilesArray count: ", len(local_files_array))
 
-    if len(remoteFilesArray) < len(localFilesArray):
-        bigger = localFilesArray
-        smaller = remoteFilesArray
-    elif len(remoteFilesArray) > len(localFilesArray):
-        bigger = remoteFilesArray
-        smaller = localFilesArray
 
+
+    # Compare local files with on drive files
     def compare():
-        filesDict = {}
+        files_dict = {}
 
-        # for i in bigger:
-        #     name = i.split("/Users/ys/Documents/image/")[1].split(".")[0]
-        #     filesDict[name] = "NULL"
-        #
-        # for i in smaller:
-        #     filesDict[i] = "NON NULL"
+        local_state = 'NULL'
+        remote_state = 'NON NULL'
 
-        for i in bigger:
-            filesDict[i] = "NULL"
 
-        for i in smaller:
+        if len(remote_files_array) < len(local_files_array):
+            local_state = 'NULL'
+            remote_state = 'NON NULL'
+
+        elif len(remote_files_array) > len(local_files_array):
+            local_state = 'NON NULL'
+            remote_state = 'NULL'
+
+
+        for i in local_files_array:
             name = i.split("/Users/ys/Documents/image/")[1].split(".")[0]
-            filesDict[name] = "NON NULL"
+            files_dict[name] = local_state
 
-        # pprint.pprint(localFilesDict)
+        for i in remote_files_array:
+            files_dict[i] = remote_state
 
-        nullFilesArray = []
 
-        for k, v in filesDict.items():
+        pprint.pprint(files_dict)
+
+        null_files_array = []
+
+        for k, v in files_dict.items():
             if v == "NULL":
-                nullFilesArray.append(k)
+                null_files_array.append(k)
 
-        print("nullFilesArray count: ", len(nullFilesArray))
-        print(nullFilesArray)
-# if __name__ == '__main__':
-#     getFiles()
+        print("null_files_array count: ", len(null_files_array))
+        print(null_files_array)
