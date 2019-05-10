@@ -5,3 +5,5 @@ ID.txt
 TOKEN.txt
 token-gdrive.pickle
 token-gsheet.pickle
+.idea
+__pycache__
